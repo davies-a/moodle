@@ -287,6 +287,7 @@ function user_get_default_fields() {
         'idnumber', 'lang', 'theme', 'timezone', 'mailformat', 'description', 'descriptionformat',
         'city', 'country', 'profileimageurlsmall', 'profileimageurl', 'customfields',
         'groups', 'roles', 'preferences', 'enrolledcourses', 'suspended', 'lastcourseaccess', 'trackforums',
+        'timemodified', 'timecreated',
     );
 }
 
@@ -482,6 +483,21 @@ function user_get_user_details($user, $course = null, array $userfields = array(
             $userdetails['lastaccess'] = $user->lastaccess;
         } else {
             $userdetails['lastaccess'] = 0;
+        }
+    }
+
+    if (in_array('timecreated', $userfields) && (!isset($hiddenfields['timecreated']) or $isadmin)) {
+        if ($user->timecreated) {
+            $userdetails['timecreated'] = $user->timecreated;
+        } else {
+            $userdetails['timecreated'] = 0;
+        }
+    }
+    if (in_array('timemodified', $userfields) && (!isset($hiddenfields['timemodified']) or $isadmin)) {
+        if ($user->timemodified) {
+            $userdetails['timemodified'] = $user->timemodified;
+        } else {
+            $userdetails['timemodified'] = 0;
         }
     }
 

@@ -1131,6 +1131,8 @@ class core_user_external extends \core_external\external_api {
             'interests'   => new external_value(PARAM_TEXT, 'user interests (separated by commas)', VALUE_OPTIONAL),
             'firstaccess' => new external_value(core_user::get_property_type('firstaccess'), 'first access to the site (0 if never)', VALUE_OPTIONAL),
             'lastaccess'  => new external_value(core_user::get_property_type('lastaccess'), 'last access to the site (0 if never)', VALUE_OPTIONAL),
+            'timecreated' => new external_value(core_user::get_property_type('timecreated'), 'timestamp that the user was created', VALUE_OPTIONAL),
+            'timemodified'=> new external_value(core_user::get_property_type('timemodified'), 'timestamp that the user was modified', VALUE_OPTIONAL),
             'auth'        => new external_value(core_user::get_property_type('auth'), 'Auth plugins include manual, ldap, etc', VALUE_OPTIONAL),
             'suspended'   => new external_value(core_user::get_property_type('suspended'), 'Suspend user account, either false to enable user login or true to disable it', VALUE_OPTIONAL),
             'confirmed'   => new external_value(core_user::get_property_type('confirmed'), 'Active user: 1 if confirmed, 0 otherwise', VALUE_OPTIONAL),
