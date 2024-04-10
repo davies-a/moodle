@@ -820,13 +820,17 @@ class core_user_external extends \core_external\external_api {
                 'criteria' => new external_multiple_structure(
                     new external_single_structure(
                         array(
-                            'key' => new external_value(PARAM_ALPHA, 'the user column to search, expected keys (value format) are:
+                            'key' => new external_value(PARAM_ALPHAEXT, 'the user column to search, expected keys (value format) are:
                                 "id" (int) matching user id,
                                 "lastname" (string) user last name (Note: you can use % for searching but it may be considerably slower!),
                                 "firstname" (string) user first name (Note: you can use % for searching but it may be considerably slower!),
                                 "idnumber" (string) matching user idnumber,
                                 "username" (string) matching user username,
                                 "email" (string) user email (Note: you can use % for searching but it may be considerably slower!),
+                                "timemodified_since" (int) epoch time that the user was last modified since
+                                "timemodified_before" (int) epoch time that the user was last modified before
+                                "timecreated_since" (int) epoch time that the user was created since
+                                "timecreated_before" (int) epoch time that the user was created before
                                 "auth" (string) matching user auth plugin'),
                             'value' => new external_value(PARAM_RAW, 'the value to search')
                         )
@@ -900,6 +904,14 @@ class core_user_external extends \core_external\external_api {
                 case 'firstname':
                     $paramtype = core_user::get_property_type('firstname');
                     break;
+                case 'timemodified_since':
+                case 'timemodified_before':
+                    $paramtype = core_user::get_property_type('timemodified');
+                    break;
+                case 'timecreated_since':
+                case 'timecreated_before':
+                    $paramtype = core_user::get_property_type('timecreated');
+                    break;
                 default:
                     // Send back a warning that this search key is not supported in this version.
                     // This warning will make the function extandable without breaking clients.
@@ -935,6 +947,18 @@ class core_user_external extends \core_external\external_api {
                         $sql .= $DB->sql_like($criteria['key'], ':' . $criteria['key'], false);
                         $sqlparams[$criteria['key']] = $cleanedvalue;
                         break;
+                    case 'timecreated_since':
+                    case 'timemodified_since':
+                        $timefieldname = substr($criteria['key'], 0, strlen($criteria['key']) - strlen('_since'));
+                        $sql .= $timefieldname . ' >= :' . $criteria['key'];
+                        $sqlparams[$criteria['key']] = $cleanedvalue;
+                        break;
+                    case 'timecreated_before':
+                    case 'timemodified_before':
+                        $timefieldname = substr($criteria['key'], 0, strlen($criteria['key']) - strlen('_before'));
+                        $sql .= $timefieldname . ' <= :' . $criteria['key'];
+                        $sqlparams[$criteria['key']] = $cleanedvalue;
+                        break;
                     default:
                         break;
                 }
@@ -954,7 +978,11 @@ class core_user_external extends \core_external\external_api {
                 $validuser = true;
 
                 foreach ($params['criteria'] as $criteria) {
-                    if (empty($userdetails[$criteria['key']])) {
+                    if (
+                        empty($userdetails[$criteria['key']]) && 
+                        // Do not mask on the basis of timestamp searched fields.
+                        !((str_ends_with($criteria['key'], '_before') || str_ends_with($criteria['key'], '_since')))
+                    ) {
                         $validuser = false;
                     }
                 }
